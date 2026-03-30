@@ -51,7 +51,6 @@ button {
     color: black;
     font-weight: bold;
 }
-
 </style>
 </head>
 
@@ -123,27 +122,30 @@ function updateActiveTask() {
     const now = new Date();
     const current = now.getHours() * 60 + now.getMinutes();
 
+    const currentTimeStr = now.getHours().toString().padStart(2,'0') + ":" +
+                           now.getMinutes().toString().padStart(2,'0');
+
     routine.forEach((item, index) => {
         const start = getMinutes(item.start);
         const end = getMinutes(item.end);
 
         const element = document.getElementById("item-" + index);
 
+        // Highlight active task
         if (current >= start && current < end) {
             element.classList.add("active");
+        } else {
+            element.classList.remove("active");
+        }
 
-            // Notification trigger at start time
-            if (now.getHours().toString().padStart(2,'0') + ":" +
-                now.getMinutes().toString().padStart(2,'0') === item.start &&
-                now.getSeconds() === 0) {
-
+        // Notification (FIXED VERSION)
+        if (currentTimeStr === item.start) {
+            if (!item.notified) {
                 new Notification("⏰ Time Alert", {
                     body: item.task
                 });
+                item.notified = true;
             }
-
-        } else {
-            element.classList.remove("active");
         }
     });
 }
