@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Maverix Routine System</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #0f172a;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+h1 {
+    color: #38bdf8;
+}
+
+.box {
+    margin-top: 20px;
+    padding: 20px;
+    background: #1e293b;
+    border-radius: 10px;
+}
+
+button {
+    padding: 10px 20px;
+    background: #38bdf8;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>⚡ Maverix Routine System</h1>
+
+<div class="box">
+    <p>Click below to activate your routine notifications</p>
+    <button onclick="startSystem()">Start System</button>
+</div>
+
+<script>
+
+const routine = [
+    { time: "06:00", task: "All Set - Get Ready" },
+    { time: "07:40", task: "Study Time" },
+    { time: "10:10", task: "Break" },
+    { time: "10:30", task: "Study Time" },
+    { time: "12:30", task: "Break" },
+    { time: "13:20", task: "Study Time" },
+    { time: "15:20", task: "Break" },
+    { time: "15:40", task: "Study Time" },
+    { time: "17:10", task: "Chill Time" },
+    { time: "17:40", task: "Study Time" },
+    { time: "19:10", task: "Dinner Break" },
+    { time: "19:40", task: "Study Time" },
+    { time: "20:40", task: "Break" },
+    { time: "21:00", task: "Study Time" },
+    { time: "22:00", task: "Relax & Prepare" },
+    { time: "23:00", task: "Sleep" }
+];
+
+function startSystem() {
+    Notification.requestPermission().then(permission => {
+        if (permission !== "granted") {
+            alert("Enable notifications bro 😤");
+            return;
+        }
+
+        alert("System Activated 🚀");
+
+        setInterval(checkTime, 1000);
+    });
+}
+
+function checkTime() {
+    const now = new Date();
+    let hours = now.getHours().toString().padStart(2, '0');
+    let minutes = now.getMinutes().toString().padStart(2, '0');
+
+    let currentTime = `${hours}:${minutes}`;
+
+    routine.forEach(item => {
+        if (item.time === currentTime && now.getSeconds() === 0) {
+            new Notification("⏰ Time Alert", {
+                body: item.task,
+                icon: "https://cdn-icons-png.flaticon.com/512/1827/1827392.png"
+            });
+        }
+    });
+}
+
+</script>
+
+</body>
+</html>
