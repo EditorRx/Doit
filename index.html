@@ -30,6 +30,26 @@ button {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.routine {
+    text-align: left;
+    max-width: 400px;
+    margin: auto;
+}
+
+.item {
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 6px;
+    background: #334155;
+}
+
+.active {
+    background: #22c55e;
+    color: black;
+    font-weight: bold;
 }
 
 </style>
@@ -40,29 +60,31 @@ button {
 <h1>⚡ Maverix Routine System</h1>
 
 <div class="box">
-    <p>Click below to activate your routine notifications</p>
+    <p>Activate your routine system</p>
     <button onclick="startSystem()">Start System</button>
+
+    <div class="routine" id="routineList"></div>
 </div>
 
 <script>
 
 const routine = [
-    { time: "06:00", task: "All Set - Get Ready" },
-    { time: "07:40", task: "Study Time" },
-    { time: "10:10", task: "Break" },
-    { time: "10:30", task: "Study Time" },
-    { time: "12:30", task: "Break" },
-    { time: "13:20", task: "Study Time" },
-    { time: "15:20", task: "Break" },
-    { time: "15:40", task: "Study Time" },
-    { time: "17:10", task: "Chill Time" },
-    { time: "17:40", task: "Study Time" },
-    { time: "19:10", task: "Dinner Break" },
-    { time: "19:40", task: "Study Time" },
-    { time: "20:40", task: "Break" },
-    { time: "21:00", task: "Study Time" },
-    { time: "22:00", task: "Relax & Prepare" },
-    { time: "23:00", task: "Sleep" }
+    { start: "06:00", end: "07:40", task: "All Set - Get Ready" },
+    { start: "07:40", end: "10:10", task: "Study" },
+    { start: "10:10", end: "10:30", task: "Break" },
+    { start: "10:30", end: "12:30", task: "Study" },
+    { start: "12:30", end: "13:20", task: "Break" },
+    { start: "13:20", end: "15:20", task: "Study" },
+    { start: "15:20", end: "15:40", task: "Break" },
+    { start: "15:40", end: "17:10", task: "Study" },
+    { start: "17:10", end: "17:40", task: "Chill" },
+    { start: "17:40", end: "19:10", task: "Study" },
+    { start: "19:10", end: "19:40", task: "Dinner Break" },
+    { start: "19:40", end: "20:40", task: "Study" },
+    { start: "20:40", end: "21:00", task: "Break" },
+    { start: "21:00", end: "22:00", task: "Study" },
+    { start: "22:00", end: "23:00", task: "Relax & Prepare" },
+    { start: "23:00", end: "23:59", task: "Sleep" }
 ];
 
 function startSystem() {
@@ -74,23 +96,54 @@ function startSystem() {
 
         alert("System Activated 🚀");
 
-        setInterval(checkTime, 1000);
+        renderRoutine();
+        setInterval(updateActiveTask, 1000);
     });
 }
 
-function checkTime() {
+function renderRoutine() {
+    const container = document.getElementById("routineList");
+    container.innerHTML = "";
+
+    routine.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.id = "item-" + index;
+        div.innerText = `${item.start} - ${item.end} → ${item.task}`;
+        container.appendChild(div);
+    });
+}
+
+function getMinutes(time) {
+    let [h, m] = time.split(":").map(Number);
+    return h * 60 + m;
+}
+
+function updateActiveTask() {
     const now = new Date();
-    let hours = now.getHours().toString().padStart(2, '0');
-    let minutes = now.getMinutes().toString().padStart(2, '0');
+    const current = now.getHours() * 60 + now.getMinutes();
 
-    let currentTime = `${hours}:${minutes}`;
+    routine.forEach((item, index) => {
+        const start = getMinutes(item.start);
+        const end = getMinutes(item.end);
 
-    routine.forEach(item => {
-        if (item.time === currentTime && now.getSeconds() === 0) {
-            new Notification("⏰ Time Alert", {
-                body: item.task,
-                icon: "https://cdn-icons-png.flaticon.com/512/1827/1827392.png"
-            });
+        const element = document.getElementById("item-" + index);
+
+        if (current >= start && current < end) {
+            element.classList.add("active");
+
+            // Notification trigger at start time
+            if (now.getHours().toString().padStart(2,'0') + ":" +
+                now.getMinutes().toString().padStart(2,'0') === item.start &&
+                now.getSeconds() === 0) {
+
+                new Notification("⏰ Time Alert", {
+                    body: item.task
+                });
+            }
+
+        } else {
+            element.classList.remove("active");
         }
     });
 }
